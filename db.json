@@ -1,11 +1,32 @@
 {
   "trackers": [
     {
-      "id": "b84e1540-5a84-11eb-972c-235bd9c15f8c",
-      "title": "Snowcone dev",
+      "id": "pZz5NDcE1K",
+      "title": "snowcone dev",
       "description": "",
       "isDesirable": true,
-      "entries": []
+      "entries": [
+        {
+          "id": "fwcXy5P91x",
+          "date": "1611133040449",
+          "notes": ""
+        },
+        {
+          "id": "W7TD2Z2l-d",
+          "date": "1611133064708",
+          "notes": ""
+        },
+        {
+          "id": "9xRZr0jLxG",
+          "date": "1611133091172",
+          "notes": ""
+        },
+        {
+          "id": "HbZThEbBfh",
+          "date": "1611133121357",
+          "notes": ""
+        }
+      ]
     }
   ]
 }

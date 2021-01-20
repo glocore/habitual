@@ -1,7 +1,7 @@
 import lowdb from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
-import { v1 as uuidV1 } from "uuid";
-import { Tracker, CreateTrackerInput } from "./commonTypes";
+import { nanoid } from "nanoid";
+import { Tracker, CreateTrackerInput, CreateEntryInput } from "./commonTypes";
 
 const adapter = new FileSync<{ trackers: Tracker[] }>("db.json");
 const db = lowdb(adapter);
@@ -19,7 +19,7 @@ const createTracker = async ({
   description = "",
   isDesirable,
 }: CreateTrackerInput) => {
-  const id = uuidV1();
+  const id = nanoid(10);
 
   const tracker = {
     id,
@@ -40,4 +40,26 @@ const getTrackers = () => {
   return result;
 };
 
-export { getTrackerById, createTracker, getTrackers };
+const createEntry = async (
+  trackerId: Tracker["id"],
+  { notes = "" }: CreateEntryInput
+) => {
+  const entryId = nanoid(10);
+  const date = Date.now().toString();
+  const finalEntry = {
+    id: entryId,
+    date,
+    notes,
+  };
+
+  await db
+    .get("trackers")
+    .find({ id: trackerId })
+    .get("entries")
+    .push(finalEntry)
+    .write();
+
+  return finalEntry;
+};
+
+export { getTrackerById, createTracker, getTrackers, createEntry };

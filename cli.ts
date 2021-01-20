@@ -1,53 +1,55 @@
 import * as inquirer from "inquirer";
 import { Tracker } from "./commonTypes";
 import { getTrackers, getTrackerById, createTracker } from "./core";
-inquirer
-  .prompt([
-    {
-      type: "list",
-      name: "action",
-      message: "What would you like to do?",
-      choices: [
-        { name: "List habit trackers", value: "list" },
-        { name: "Create habit tracker", value: "create" },
-      ],
-    },
-  ])
-  .then((answers) => {
-    if (answers.action === "list") {
-      trackerInquirer();
-    }
-    if (answers.action === "create") {
-      createTrackerInquirer();
-    }
-  });
+import { createEntry } from "./data";
 
-const trackerInquirer = () => {
+const init = async () => {
+  while (true) {
+    console.clear();
+    await rootEnquirer();
+  }
+};
+
+const rootEnquirer = async () => {
   const trackers = getTrackers();
-  const prompt = inquirer.createPromptModule();
 
-  prompt([
-    {
-      type: "list",
-      name: "tracker",
-      message: "Select tracker",
-      choices: trackers.map((tracker) => {
+  let choices = [
+    { name: "Create habit tracker", value: "create" },
+    new inquirer.Separator(),
+  ];
+
+  if (!trackers.length) {
+    choices.push(new inquirer.Separator("No active habit trackers."));
+  } else {
+    choices.push(new inquirer.Separator("Active habit trackers:"));
+    choices = choices.concat(
+      trackers.map((tracker) => {
         return {
           name: tracker.title,
           value: tracker.id,
         };
-      }),
+      })
+    );
+  }
+
+  const answers = await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "Habitual CLI",
+      choices,
     },
-  ]).then((answers) => {
-    const tracker = getTrackerById(answers.tracker);
-    printTrackerBrief(tracker);
-  });
+  ]);
+
+  if (answers.action === "create") {
+    await createTrackerInquirer();
+  } else {
+    await trackerSummaryEnquirer(answers.action);
+  }
 };
 
-const createTrackerInquirer = () => {
-  const prompt = inquirer.createPromptModule();
-
-  prompt([
+const createTrackerInquirer = async () => {
+  const answers = await inquirer.prompt([
     {
       type: "input",
       name: "title",
@@ -63,16 +65,85 @@ const createTrackerInquirer = () => {
       name: "isDesirable",
       message: "Is this habit good for you?",
       choices: [
-        { name: "Yes, I'm trying to build this habit.", value: true },
-        { name: "No, I'm trying to break this habit.", value: false },
+        {
+          name: "Yes, I'm trying to build this habit.",
+          value: true,
+          short: "Yes",
+        },
+        {
+          name: "No, I'm trying to break this habit.",
+          value: false,
+          short: "No",
+        },
       ],
     },
-  ]).then(async (answers) => {
-    const { title, description, isDesirable } = answers;
-    const tracker = await createTracker({ title, description, isDesirable });
-    console.log("New habit tracker created:");
-    printTrackerBrief(tracker);
-  });
+  ]);
+
+  const { title, description, isDesirable } = answers;
+  const tracker = await createTracker({ title, description, isDesirable });
+  console.log("\nNew habit tracker created:");
+  printTrackerBrief(tracker);
+
+  await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "Actions",
+      choices: [{ name: "Go to main menu", value: "back" }],
+    },
+  ]);
+};
+
+const trackerSummaryEnquirer = async (trackerId: Tracker["id"]) => {
+  const tracker = getTrackerById(trackerId);
+  console.clear();
+  printTrackerBrief(tracker);
+
+  const answers = await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "Actions",
+      choices: [
+        { name: "Go back", value: "back" },
+        { name: "Log an entry", value: "createEntry" },
+        { name: "Edit this tracker", value: "edit" },
+        { name: "Delete this tracker", value: "delete" },
+      ],
+    },
+  ]);
+
+  if (answers.action === "createEntry") {
+    await createEntryEnquirer(tracker);
+  }
+};
+
+const createEntryEnquirer = async (tracker: Tracker) => {
+  console.clear();
+  printTrackerBrief(tracker);
+
+  const answers = await inquirer.prompt([
+    {
+      type: "input",
+      name: "notes",
+      message: "Notes (optional)",
+    },
+  ]);
+
+  const entry = await createEntry(tracker.id, { notes: answers.notes });
+  const { notes } = entry;
+
+  console.log("\nNew entry logged");
+  console.log(notes);
+
+  await inquirer.prompt([
+    {
+      type: "list",
+      name: "action",
+      message: "Actions",
+      choices: [{ name: "Go to main menu", value: "back" }],
+    },
+  ]);
 };
 
 const printTrackerBrief = (tracker: Tracker) => {
@@ -84,7 +155,11 @@ const printTrackerBrief = (tracker: Tracker) => {
 
   console.log(
     tracker.isDesirable
-      ? "You are trying to build this habit."
-      : "You are trying to break this habit."
+      ? "You are building this habit."
+      : "You are breaking this habit."
   );
+
+  console.log("\n");
 };
+
+init();

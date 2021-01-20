@@ -1,5 +1,5 @@
 import * as data from "./data";
-import { Tracker, CreateTrackerInput } from "./commonTypes";
+import { Tracker, CreateTrackerInput, CreateEntryInput } from "./commonTypes";
 
 const getTrackers = () => {
   return data.getTrackers();
@@ -13,8 +13,12 @@ const createTracker = (tracker: CreateTrackerInput) => {
   return data.createTracker(tracker);
 };
 
+const createEntry = (trackerId: Tracker["id"], entry: CreateEntryInput) => {
+  return data.createEntry(trackerId, entry);
+};
+
 const editTracker = () => {};
 
 const deleteTracker = () => {};
 
-export { getTrackers, getTrackerById, createTracker };
+export { getTrackers, getTrackerById, createTracker, createEntry };

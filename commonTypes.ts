@@ -1,6 +1,6 @@
 export type Entry = {
   id: string;
-  date: Date;
+  date: string;
   notes: string;
 };
 
@@ -14,3 +14,5 @@ export type Tracker = {
 
 export type CreateTrackerInput = Pick<Tracker, "title" | "isDesirable"> &
   Partial<Pick<Tracker, "description">>;
+
+export type CreateEntryInput = Partial<Pick<Entry, "notes">>;
