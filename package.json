@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-cli": "tsc ./cli.ts",
-    "dev": "tsc -w -p ./tsconfig.json"
+    "build": "tsc",
+    "dev": "tsc -w -p ./tsconfig.json",
+    "cli": "node ./dist/cli.js"
   },
   "keywords": [],
   "author": "Ashwin",
